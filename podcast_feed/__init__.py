@@ -1,7 +1,7 @@
 from django.contrib.syndication.views import Feed
 from django.utils.feedgenerator import Rss201rev2Feed
 
-VERSION = '0.0.1'
+VERSION = '0.0.2'
 NAME = 'django-podcast-feed'
 DESCRIPTION = 'Generate Apple Podcasts-compatible syndication feeds.'
 
@@ -45,10 +45,10 @@ class ItunesPodcastRssFeed(Rss201rev2Feed):
         super().add_item_elements(handler, item)
         if item.get('description'):
             handler.addQuickElement('itunes:summary', item.get('description'))
-        if item.get('duration'):
-            handler.addQuickElement('itunes:duration', item.get('duration'))
         if item.get('author_name'):
             handler.addQuickElement('itunes:author', item.get('author_name'))
+        if item.get('duration'):
+            handler.addQuickElement('itunes:duration', item.get('duration'))
 
 
 class PodcastFeed(Feed):
@@ -72,3 +72,8 @@ class PodcastFeed(Feed):
         feed.feed['owner_name'] = self._get_dynamic_attr('owner_name', obj)
         feed.feed['owner_email'] = self._get_dynamic_attr('owner_email', obj)
         return feed
+
+    def item_extra_kwargs(self, item):
+        extra_kwargs = super().item_extra_kwargs(item)
+        extra_kwargs['duration'] = str(self._get_dynamic_attr('item_duration', item))
+        return extra_kwargs
